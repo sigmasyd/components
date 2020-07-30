@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class ListaPage extends StatefulWidget {
@@ -10,6 +12,7 @@ class _ListaPageState extends State<ListaPage> {
 
   List<int> _listaNumeros = new List();
   int _ultimoItem = 0;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -20,9 +23,22 @@ class _ListaPageState extends State<ListaPage> {
       print("scrolling....");
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _agregar10();
+        //_agregar10();
+        fetchData();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // el _scrollController se crea cada vez que entro en la pagina
+    // eventualmente cada vez que salga y vuelva a entrar se creara un _scrollController
+    // para evitar esto se maneja el evento dispose() que basicamente se ejecuta al momento
+    // de que una pantalla sale del stack de navegacion(es decir si voy hacia atras se ejecuta el metodo)
+    // entonces aqui ejecutamos el evento dispose() del _scrollController para que al salir de la pantalla
+    // se destruya el objeto _scrollController y evitar carga o fuga de memoria con _scrollController's innecesarios
+    _scrollController.dispose();
   }
 
   @override
@@ -31,7 +47,12 @@ class _ListaPageState extends State<ListaPage> {
       appBar: AppBar(
         title: Text("Listas"),
       ),
-      body: _crearLista(),
+      body: Stack(
+        children: <Widget>[
+          _crearLista(),
+          _crearLoading(),
+        ],
+      ),
     );
   }
 
@@ -55,5 +76,41 @@ class _ListaPageState extends State<ListaPage> {
       _listaNumeros.add(_ultimoItem);
     }
     setState(() {});
+  }
+
+  Future<Null> fetchData() async {
+    _isLoading = true;
+    setState(() {});
+
+    final duration = new Duration(seconds: 2);
+    new Timer(duration,
+        respuestaHTTP); // no se pone parentesis sino se ejecuta en el momento
+  }
+
+  void respuestaHTTP() {
+    _isLoading = false;
+    _scrollController.animateTo(_scrollController.position.pixels + 100,
+        curve: Curves.fastOutSlowIn, duration: Duration(milliseconds: 250));
+    _agregar10();
+  }
+
+  Widget _crearLoading() {
+    if (_isLoading) {
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[CircularProgressIndicator()],
+          ),
+          SizedBox(
+            height: 15.0,
+          )
+        ],
+      );
+    } else {
+      return Container();
+    }
   }
 }
