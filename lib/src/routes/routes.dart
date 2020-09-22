@@ -12,7 +12,8 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
   return <String, WidgetBuilder>{
     "/": (BuildContext context) => HomePage(),
     'alert': (BuildContext context) => AlertPage(),
-    'avatar': (BuildContext context) => AvatarPage(),
+    AvatarPage.pagename: (BuildContext context) =>
+        AvatarPage(), // para evitar dejar quemado el texto del slug de la pagina
     'card': (BuildContext context) => CardPage(),
     'animatedContainer': (BuildContext context) => AnimatedContainerPage(),
     'inputs': (BuildContext context) => InputPage(),
